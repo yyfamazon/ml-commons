@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.opensearch.Version;
 import org.opensearch.cluster.ClusterChangedEvent;
 import org.opensearch.cluster.ClusterState;
 import org.opensearch.cluster.ClusterStateListener;
@@ -89,17 +88,20 @@ public class MLCommonsClusterEventListener implements ClusterStateListener {
          * The following logic implements this behavior.
          */
         for (DiscoveryNode node : state.nodes()) {
-            if (node.isDataNode() && Version.V_3_1_0.onOrAfter(node.getVersion())) {
-                if (mlFeatureEnabledSetting.isMetricCollectionEnabled() && mlFeatureEnabledSetting.isStaticMetricCollectionEnabled()) {
-                    mlTaskManager.indexStatsCollectorJob(true);
-                }
-
-                if (clusterService.state().getMetadata().hasIndex(TASK_POLLING_JOB_INDEX)) {
-                    mlTaskManager.startTaskPollingJob();
-                }
-
-                break;
+            // if (node.isDataNode() && node.getVersion().onOrAfter(Version.V_3_1_0)) {
+            if (mlFeatureEnabledSetting.isMetricCollectionEnabled() && mlFeatureEnabledSetting.isStaticMetricCollectionEnabled()) {
+                mlTaskManager.indexStatsCollectorJob(true);
             }
+
+            if (clusterService.state().getMetadata().hasIndex(TASK_POLLING_JOB_INDEX)) {
+                mlTaskManager.startTaskPollingJob();
+            }
+
+            // 启动 DeepresearchAgent 定时任务（每天凌晨3点执行）
+            mlTaskManager.startDeepresearchAgentCronJob();
+
+            // break;
+            // }
         }
     }
 }

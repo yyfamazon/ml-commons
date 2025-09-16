@@ -53,6 +53,7 @@ import org.opensearch.ml.common.exception.MLLimitExceededException;
 import org.opensearch.ml.common.exception.MLResourceNotFoundException;
 import org.opensearch.ml.common.settings.SettingsChangeListener;
 import org.opensearch.ml.engine.indices.MLIndicesHandler;
+import org.opensearch.ml.jobs.DeepresearchAgentCronJob;
 import org.opensearch.ml.jobs.MLJobParameter;
 import org.opensearch.ml.jobs.MLJobType;
 import org.opensearch.remote.metadata.client.PutDataObjectRequest;
@@ -84,6 +85,7 @@ public class MLTaskManager implements SettingsChangeListener {
     private final Map<MLTaskType, AtomicInteger> runningTasksCount;
     private boolean taskPollingJobStarted;
     private boolean statsCollectorJobStarted;
+    private boolean deepresearchAgentCronJobStarted;
     public static final ImmutableSet<MLTaskState> TASK_DONE_STATES = ImmutableSet
         .of(MLTaskState.COMPLETED, MLTaskState.COMPLETED_WITH_ERROR, MLTaskState.FAILED, MLTaskState.CANCELLED);
 
@@ -596,6 +598,28 @@ public class MLTaskManager implements SettingsChangeListener {
             indexJob(indexRequest, MLJobType.STATS_COLLECTOR, () -> {});
         } catch (IOException e) {
             log.error("Failed to index stats collection job", e);
+        }
+    }
+
+    public void startDeepresearchAgentCronJob() {
+        System.out.println("deepresearchAgentCronJobStarted is " + deepresearchAgentCronJobStarted);
+        // if (this.deepresearchAgentCronJobStarted) {
+        // return;
+        // }
+
+        try {
+            MLJobParameter jobParameter = DeepresearchAgentCronJob
+                .createIntervalJob("deepresearch-agent-job-interval-5min", 3, ChronoUnit.MINUTES, true);
+
+            IndexRequest indexRequest = new IndexRequest()
+                .index(CommonValue.ML_JOBS_INDEX)
+                .id(MLJobType.DEEPRESEARCH_AGENT_CRON.name())
+                .source(jobParameter.toXContent(JsonXContent.contentBuilder(), null))
+                .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
+
+            indexJob(indexRequest, MLJobType.DEEPRESEARCH_AGENT_CRON, () -> this.deepresearchAgentCronJobStarted = true);
+        } catch (IOException e) {
+            log.error("Failed to index deepresearch agent cron job", e);
         }
     }
 

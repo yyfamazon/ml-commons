@@ -6,11 +6,15 @@
 package org.opensearch.ml.jobs;
 
 import org.opensearch.cluster.service.ClusterService;
+//import org.opensearch.common.util.concurrent.ThreadContext;
+//import org.opensearch.commons.alerting.model.MonitorRunResult;
 import org.opensearch.jobscheduler.spi.JobExecutionContext;
 import org.opensearch.jobscheduler.spi.ScheduledJobParameter;
 import org.opensearch.jobscheduler.spi.ScheduledJobRunner;
 import org.opensearch.ml.common.settings.MLFeatureEnabledSetting;
 import org.opensearch.ml.helper.ConnectorAccessControlHelper;
+import org.opensearch.ml.jobs.processors.DeepresearchAgentCronJobProcessor;
+import org.opensearch.ml.jobs.processors.InjectorContextElement;
 import org.opensearch.ml.jobs.processors.MLBatchTaskUpdateProcessor;
 import org.opensearch.ml.jobs.processors.MLStatsJobProcessor;
 import org.opensearch.remote.metadata.client.SdkClient;
@@ -21,6 +25,9 @@ import com.google.common.annotations.VisibleForTesting;
 
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Log4j2
 public class MLJobRunner implements ScheduledJobRunner {
@@ -106,6 +113,26 @@ public class MLJobRunner implements ScheduledJobRunner {
             case BATCH_TASK_UPDATE:
                 MLBatchTaskUpdateProcessor.getInstance(clusterService, client, threadPool).process(jobParameter, jobExecutionContext);
                 break;
+            case DEEPRESEARCH_AGENT_CRON:
+                log.info("jobParameter.getJobType() is " + jobParameter.getJobType());
+                log.info("jobExecutionContext is " + jobExecutionContext);
+                log.info("this.threadPool.getThreadContext() is " + this.threadPool.getThreadContext().getTransient("opendistro_security_injected_roles"));
+                log.info("client.threadPool().getThreadContext() is " + client.threadPool().getThreadContext().getTransient("opendistro_security_injected_roles"));
+                log.info("client is " + client.admin());
+                log.info("client admin is " + client.admin());
+                log.info("client settings " + client.settings());
+                log.info("clusterService is " + clusterService);
+                log.info("clusterService setting is " + clusterService.getSettings());
+
+//                log.info("contextElement is " + contextElement);
+//                log.info("contextElement role is " + contextElement.getRoles());
+
+               DeepresearchAgentCronJobProcessor
+                       .getInstance(clusterService, client, threadPool)
+                       .process(jobParameter, jobExecutionContext);
+//               DeepresearchAgentCronJobProcessor.getInstance(clusterService, client, threadPool)
+//                        .process(jobParameter, jobExecutionContext);
+               break;
             default:
                 throw new IllegalArgumentException("Unsupported job type " + jobParameter.getJobType());
         }

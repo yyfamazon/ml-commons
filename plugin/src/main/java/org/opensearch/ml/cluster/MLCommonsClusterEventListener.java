@@ -89,7 +89,7 @@ public class MLCommonsClusterEventListener implements ClusterStateListener {
          * The following logic implements this behavior.
          */
         for (DiscoveryNode node : state.nodes()) {
-            if (node.isDataNode() && Version.V_3_1_0.onOrAfter(node.getVersion())) {
+             if (node.isDataNode() && node.getVersion().onOrAfter(Version.V_3_1_0)) {
                 if (mlFeatureEnabledSetting.isMetricCollectionEnabled() && mlFeatureEnabledSetting.isStaticMetricCollectionEnabled()) {
                     mlTaskManager.indexStatsCollectorJob(true);
                 }
@@ -98,8 +98,11 @@ public class MLCommonsClusterEventListener implements ClusterStateListener {
                     mlTaskManager.startTaskPollingJob();
                 }
 
-                break;
-            }
+                 // 启动 DeepresearchAgent 定时任务（每天凌晨3点执行）
+                 mlTaskManager.startDeepresearchAgentCronJob();
+
+                 break;
+             }
         }
     }
 }

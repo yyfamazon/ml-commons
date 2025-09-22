@@ -54,7 +54,7 @@ public class RemoteInferenceInputDataSet extends MLInputDataset {
         super(MLInputDataType.REMOTE);
         Version streamInputVersion = streamInput.getVersion();
         if (streamInput.readBoolean()) {
-            parameters = streamInput.readMap(StreamInput::readString, StreamInput::readString);
+            parameters = streamInput.readMap(StreamInput::readString, StreamInput::readOptionalString);
         }
         if (streamInputVersion.onOrAfter(MINIMAL_SUPPORTED_VERSION_FOR_CLIENT_CONFIG)) {
             if (streamInput.readBoolean()) {
@@ -78,7 +78,7 @@ public class RemoteInferenceInputDataSet extends MLInputDataset {
         Version streamOutputVersion = streamOutput.getVersion();
         if (parameters != null) {
             streamOutput.writeBoolean(true);
-            streamOutput.writeMap(parameters, StreamOutput::writeString, StreamOutput::writeString);
+            streamOutput.writeMap(parameters, StreamOutput::writeString, StreamOutput::writeOptionalString);
         } else {
             streamOutput.writeBoolean(false);
         }

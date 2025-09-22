@@ -84,7 +84,9 @@ allprojects {
         jacoco.toolVersion = '0.8.13'
     }
 
-    project.getExtensions().getExtraProperties().set("versions", VersionProperties.getVersions());
+    var versions = VersionProperties.getVersions()
+    versions.put("error_prone_annotations", "2.41.0")
+    project.getExtensions().getExtraProperties().set("versions", versions);
 
 }
 

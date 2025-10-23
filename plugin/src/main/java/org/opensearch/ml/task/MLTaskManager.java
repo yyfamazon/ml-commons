@@ -603,9 +603,9 @@ public class MLTaskManager implements SettingsChangeListener {
 
     public void startDeepresearchAgentCronJob() {
         System.out.println("deepresearchAgentCronJobStarted is " + deepresearchAgentCronJobStarted);
-        // if (this.deepresearchAgentCronJobStarted) {
-        // return;
-        // }
+         if (this.deepresearchAgentCronJobStarted) {
+            return;
+         }
 
         try {
             MLJobParameter jobParameter = DeepresearchAgentCronJob

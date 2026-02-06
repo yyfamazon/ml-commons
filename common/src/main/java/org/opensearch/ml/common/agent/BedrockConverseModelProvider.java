@@ -52,7 +52,7 @@ public class BedrockConverseModelProvider extends ModelProvider {
 
     private static final String DEFAULT_REGION = "us-east-1";
 
-    private static final String REQUEST_BODY_TEMPLATE = "{\"system\": [{\"text\": \"${parameters.system_prompt}\"}], "
+    private static final String REQUEST_BODY_TEMPLATE = "{\"system\": [{\"text\": \"${parameters.system_prompt}\"}, {\"cachePoint\": {\"type\": \"default\", \"ttl\": \"1h\"}}], "
         + "\"messages\": [${parameters._chat_history:-}${parameters.body}${parameters._interactions:-}]"
         + "${parameters.tool_configs:-} }";
 
